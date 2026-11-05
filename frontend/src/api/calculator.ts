@@ -9,6 +9,28 @@ export class ApiError extends Error {
 }
 
 export async function calculate(input: Calculation, signal?: AbortSignal): Promise<number> {
+  const controller = new AbortController();
+  const cancel = () => controller.abort(signal?.reason);
+  signal?.addEventListener('abort', cancel, { once: true });
+  if (signal?.aborted) cancel();
+
+  const timer = setTimeout(() => {
+    controller.abort(new Error('The calculation timed out. Please try again.'));
+  }, 15_000);
+
+  try {
+    controller.signal.throwIfAborted();
+    return await requestCalculation(input, controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted) throw controller.signal.reason;
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', cancel);
+  }
+}
+
+async function requestCalculation(input: Calculation, signal: AbortSignal): Promise<number> {
   const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/+$/, '');
   let response: Response;
   try {

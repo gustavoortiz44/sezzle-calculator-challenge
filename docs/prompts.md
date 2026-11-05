@@ -383,3 +383,410 @@ Added an onAttempt callback to CalculatorForm, invoked after the pending-request
 Added two regression cases: division by zero followed by an empty first or second operand. Both tests failed before the fix because the obsolete API alert remained. After the fix, each verifies that only the field validation alert remains and that no additional request is sent.
 
 Validation from frontend/: npm.cmd test and npm.cmd run test:coverage passed all 56 tests across 3 files; npm.cmd run typecheck and npm.cmd run build passed. V8 coverage: statements 98.7% (76/77), branches 95.38% (62/65), functions 100% (17/17), lines 100% (60/60). Coverage reports were regenerated locally. Existing duplicate-submission and retry tests remain passing. No additional defects were found; browser verification of this fix and owner review remain pending. No commits, pushes, merges, or Pull Requests were performed.
+
+## Prompt 04 — Final Technical Audit
+
+### Original prompt
+
+````text
+# Prompt 04 — Final Technical Audit | Sezzle Calculator Challenge
+
+Actúa como un Senior Full Stack Engineer y Technical Reviewer encargado de realizar una auditoría final del proyecto Sezzle Calculator Challenge antes de su entrega.
+
+## 1. Instrucciones obligatorias
+
+Antes de comenzar:
+
+- Lee completamente `AGENTS.md`, `README.md` y `docs/prompts.md`.
+- Revisa la estructura completa del repositorio.
+- Confirma que estamos trabajando sobre la rama `main`.
+- Verifica que `main` esté sincronizada con `origin/main`.
+- Confirma que el árbol de trabajo esté limpio.
+
+**IMPORTANTE: Esta auditoría es estrictamente de solo lectura.**
+
+No tienes autorización para:
+
+- Modificar, crear o eliminar archivos del proyecto.
+- Instalar, actualizar o eliminar dependencias.
+- Crear ramas, commits, tags o Pull Requests.
+- Ejecutar push, merge, reset o comandos que alteren el repositorio.
+- Corregir problemas automáticamente.
+- Modificar `AGENTS.md` ni `docs/prompts.md`.
+
+Puedes ejecutar comandos de inspección, pruebas, análisis estático y compilación, siempre que no modifiquen archivos versionados. Evita generar artefactos persistentes; utiliza rutas temporales cuando sea necesario. Solicita autorización si una verificación requiere cambios o permisos adicionales.
+
+## 2. Revisión de requisitos
+
+Identifica los requisitos originales del challenge utilizando la documentación disponible en el repositorio.
+
+Verifica que cada requisito esté implementado correctamente.
+
+No inventes requisitos ni supongas que algo está aprobado sin evidencia.
+
+Clasifica cada requisito como:
+
+- PASS: cumple con evidencia verificable.
+- FAIL: incumplimiento confirmado.
+- WARNING: riesgo o cumplimiento parcial.
+- NOT VERIFIED: no fue posible comprobarlo.
+
+## 3. Auditoría del backend Go
+
+Revisa:
+
+- Arquitectura y separación de responsabilidades.
+- Implementación de suma, resta, multiplicación y división.
+- Validación estricta de solicitudes JSON.
+- Manejo de división entre cero.
+- Manejo de números inválidos y resultados no finitos.
+- Códigos HTTP y estructura de errores.
+- Configuración CORS.
+- Seguridad básica del servidor.
+- Pruebas unitarias y HTTP.
+- Cobertura real y calidad de las pruebas.
+
+Ejecuta, si el entorno lo permite:
+
+- `go test ./...`
+- `go test -cover ./...`
+- `go vet ./...`
+- `go build ./...`
+
+## 4. Auditoría del frontend React
+
+Revisa:
+
+- Arquitectura React + TypeScript.
+- Integración con la API Go.
+- Implementación de las cuatro operaciones.
+- Validación de operandos.
+- Manejo de errores de API y red.
+- Estados de carga.
+- Prevención de solicitudes duplicadas.
+- Accesibilidad básica.
+- Diseño responsive.
+- Manejo correcto de errores anteriores cuando falla una nueva validación.
+- Seguridad de configuración y dependencias.
+- Pruebas automatizadas y cobertura.
+
+Ejecuta las verificaciones disponibles mediante los scripts existentes:
+
+- Pruebas automatizadas.
+- Cobertura.
+- TypeScript.
+- Build de producción.
+- Auditoría de dependencias, si está permitida.
+
+No instales ni actualices dependencias.
+
+## 5. Revisión de integración
+
+Verifica que el contrato HTTP utilizado por React coincida exactamente con el backend Go.
+
+Revisa:
+
+- Endpoint y método HTTP.
+- Estructura del JSON enviado.
+- Estructura de respuestas exitosas.
+- Estructura de errores.
+- Variables de entorno.
+- Origen permitido por CORS.
+- Configuración de puertos.
+
+Distingue claramente entre verificaciones estáticas y pruebas de integración ejecutadas realmente.
+
+No afirmes que una prueba navegador–backend pasó si no fue ejecutada durante esta auditoría.
+
+## 6. Documentación y repositorio
+
+Revisa:
+
+- Calidad y precisión del README.
+- Instrucciones de instalación y ejecución.
+- Comandos de pruebas.
+- Variables de entorno documentadas.
+- Historial de prompts de IA en `docs/prompts.md`.
+- Consistencia entre documentación y código.
+- Archivos excluidos mediante `.gitignore`.
+- Ausencia de credenciales o secretos versionados.
+- Estado de Git y commits relevantes.
+
+## 7. Reporte final obligatorio
+
+Entrega un reporte estructurado con:
+
+### A. Executive Summary
+Evaluación general del proyecto y su preparación para entrega.
+
+### B. Requirements Compliance Matrix
+Tabla de requisitos, estado, evidencia y observaciones.
+
+### C. Backend Audit
+Hallazgos técnicos y resultados reales de verificaciones.
+
+### D. Frontend Audit
+Hallazgos técnicos y resultados reales de verificaciones.
+
+### E. Integration Audit
+Compatibilidad del contrato y verificaciones realizadas.
+
+### F. Documentation & Repository Audit
+Estado de documentación, Git y seguridad básica.
+
+### G. Findings
+Clasifica los hallazgos como:
+
+- CRITICAL
+- HIGH
+- MEDIUM
+- LOW
+- INFORMATIONAL
+
+Incluye archivo, ubicación, evidencia, impacto y recomendación.
+
+### H. Final Recommendation
+Emite una de estas conclusiones:
+
+- READY FOR SUBMISSION
+- READY WITH MINOR OBSERVATIONS
+- NOT READY FOR SUBMISSION
+
+Justifica la conclusión.
+
+## 8. Restricción final
+
+No implementes ninguna corrección.
+
+Si detectas problemas, explica cómo resolverlos y espera mi autorización explícita.
+
+Al finalizar, confirma que la rama `main` y los archivos versionados permanecen sin modificaciones.
+````
+### Purpose and outcome
+
+Perform a read-only final audit. The audit ran on clean main at 71e61cb, verified against origin/main and the remote GitHub branch. Go tests, vet, and build passed; backend statement coverage was 93.1% overall (calculator 100%, httpapi 98.8%, main 0%). Frontend tests passed 56 cases, TypeScript and build passed, and coverage measured 98.7% statements, 95.38% branches, 100% functions and lines. npm audit reported 0 vulnerabilities.
+
+Recommendation: READY WITH MINOR OBSERVATIONS. Findings: stale README metrics, an overly broad Node engine range, no client request timeout, and an informational ignored JSON-write error in Go. No corrections were made during that audit. Live HTTP verification was skipped because port 8080 was occupied; browser-to-backend integration, visual, and screen-reader behavior were not verified. This prompt is recorded retrospectively under the explicit Prompt 05 authorization; the original audit prohibited documentation edits.
+
+## Prompt 05 — Final Audit Fixes
+
+### Original prompt
+````text
+# Prompt 05 — Final Audit Fixes | Sezzle Calculator Challenge
+
+Actúa como un Senior Full Stack Engineer especializado en React, TypeScript, Go, testing y buenas prácticas de Git.
+
+El objetivo es resolver las observaciones menores identificadas durante la auditoría final del Sezzle Calculator Challenge, sin alterar las funcionalidades existentes ni introducir complejidad innecesaria.
+
+## 1. Instrucciones obligatorias
+
+Antes de realizar cualquier modificación:
+
+1. Lee completamente `AGENTS.md`, `README.md` y `docs/prompts.md`.
+2. Revisa la implementación actual del backend y frontend.
+3. Confirma la rama actual y el estado del repositorio.
+4. Verifica que `main` esté sincronizada con `origin/main`.
+5. Confirma que el árbol de trabajo esté limpio.
+6. Revisa las versiones de Node, Vite, Vitest y las dependencias existentes.
+
+No modifiques archivos, instales dependencias ni ejecutes operaciones de escritura hasta recibir mi autorización explícita.
+
+Respeta todas las instrucciones de `AGENTS.md`.
+
+## 2. Estrategia de Git
+
+La rama autorizada para este requerimiento será:
+
+`fix/final-audit-observations`
+
+Debe partir de la última versión de `origin/main`.
+
+Antes de crearla, presenta tu plan y espera mi autorización.
+
+No realices modificaciones directamente sobre `main`.
+
+No ejecutes commits, push, merges ni Pull Requests sin autorización posterior.
+
+El merge final será realizado manualmente por mí.
+
+## 3. Corrección del README
+
+La auditoría detectó métricas desactualizadas en `README.md`.
+
+Revisa los resultados actuales de las pruebas y actualiza:
+
+- Número de pruebas automatizadas.
+- Cobertura de sentencias.
+- Cobertura de ramas.
+- Cobertura de funciones.
+- Cobertura de líneas.
+- Cualquier otra cifra que ya no coincida con las mediciones reales.
+
+No utilices métricas históricas como si fueran resultados actuales.
+
+Conserva la documentación existente y evita reescrituras innecesarias.
+
+## 4. Compatibilidad de Node.js
+
+La auditoría identificó que `frontend/package.json` declara un rango `engines.node` más amplio que el soportado por algunas herramientas de desarrollo.
+
+Investiga las restricciones reales de:
+
+- Vite.
+- Vitest.
+- Plugin React de Vite.
+- Otras dependencias que establezcan restricciones de Node.
+
+Propón un rango de versiones compatible con todas ellas.
+
+No actualices dependencias únicamente para resolver la declaración de compatibilidad.
+
+Si es necesario modificar `package-lock.json`, explica por qué antes de hacerlo.
+
+El entorno local utilizado previamente fue Node.js 24.22.1.
+
+## 5. Timeout de solicitudes HTTP
+
+La auditoría identificó que el cliente HTTP del frontend no establece un tiempo máximo para las solicitudes.
+
+Propón implementar un timeout razonable en:
+
+`frontend/src/api/calculator.ts`
+
+Requisitos:
+
+- Utilizar preferentemente APIs nativas del navegador.
+- Evitar dependencias adicionales.
+- Cancelar solicitudes que excedan el tiempo establecido.
+- Mostrar un mensaje comprensible al usuario.
+- Recuperar correctamente el estado de la interfaz.
+- Mantener la prevención de solicitudes duplicadas.
+- Conservar la cancelación existente al desmontar componentes.
+- Distinguir, cuando corresponda, entre timeout y cancelación intencional.
+- Evitar actualizaciones de estado después de desmontar.
+- No modificar el contrato REST del backend.
+
+Agrega pruebas automatizadas para el timeout y la recuperación posterior.
+
+El tiempo exacto debe justificarse en la propuesta técnica antes de implementarlo.
+
+## 6. Registro de documentación de IA
+
+Una vez autorizada la implementación, actualiza:
+
+`docs/prompts.md`
+
+Registra:
+
+- Prompt 04 — Final Technical Audit.
+- Resumen de sus resultados.
+- Prompt 05 — Final Audit Fixes.
+- Mi autorización explícita.
+- Cambios realizados.
+- Pruebas ejecutadas y resultados.
+
+Conserva íntegramente los registros anteriores.
+
+## 7. Alcance restringido
+
+No debes:
+
+- Modificar el backend Go.
+- Cambiar el diseño visual.
+- Modificar las cuatro operaciones matemáticas.
+- Alterar el contrato HTTP.
+- Agregar funcionalidades fuera del alcance.
+- Instalar nuevas dependencias sin autorización.
+- Modificar `AGENTS.md`.
+- Realizar refactorizaciones no relacionadas.
+
+La observación informativa sobre el registro de errores de escritura del backend queda fuera del alcance.
+
+## 8. Validaciones posteriores
+
+Después de recibir autorización e implementar los cambios, ejecuta:
+
+- Pruebas automatizadas del frontend.
+- Cobertura de pruebas.
+- Verificación TypeScript.
+- Build de producción.
+- Auditoría npm.
+- Revisión de Git y archivos modificados.
+
+Si alguna comprobación no puede ejecutarse, explica el motivo.
+
+No declares pruebas exitosas sin haberlas ejecutado.
+
+## 9. Primera respuesta obligatoria
+
+Antes de implementar, entrégame:
+
+### A. Estado del repositorio
+Rama, sincronización y estado de Git.
+
+### B. Diagnóstico
+Confirma cada observación de la auditoría y su causa.
+
+### C. Propuesta técnica
+Explica las modificaciones específicas, incluyendo el timeout y el rango de Node.
+
+### D. Archivos previstos
+Enumera los archivos que necesitarían modificaciones.
+
+### E. Riesgos
+Identifica posibles regresiones y cómo prevenirlas.
+
+### F. Plan de pruebas
+Explica cómo verificarás cada corrección.
+
+### G. Solicitud de autorización
+Pregunta explícitamente si apruebo la creación de la rama y la implementación.
+
+**DETENTE después de presentar este plan. No crees la rama ni modifiques archivos hasta recibir mi aprobación.**
+
+## 10. Entrega posterior
+
+Una vez implementado y validado el trabajo, presenta un reporte con los resultados y espera mi revisión manual.
+
+No realices commits, push, merges ni Pull Requests sin una autorización adicional.
+````
+
+### Implementation authorization
+
+````text
+Apruebo explícitamente la propuesta del Prompt 05 — Final Audit Fixes.
+
+Autorizo:
+
+1. Crear la rama `fix/final-audit-observations` desde la última versión de `origin/main`.
+2. Actualizar las métricas del README con resultados reales.
+3. Ajustar `engines.node` en `package.json` y los metadatos correspondientes en `package-lock.json`, sin actualizar dependencias.
+4. Implementar el timeout HTTP de 15 segundos, conservando la cancelación existente y evitando solicitudes duplicadas.
+5. Agregar las pruebas automatizadas propuestas.
+6. Actualizar `docs/prompts.md` con los registros de los Prompts 04 y 05, mi autorización y los resultados.
+
+Consideraciones adicionales:
+
+- Verifica la compatibilidad exacta del rango de Node con las herramientas instaladas.
+- Asegura que el timeout no se confunda con una cancelación intencional.
+- Confirma que los temporizadores y listeners se liberen correctamente.
+- No modifiques el backend, el diseño visual, el contrato REST ni `AGENTS.md`.
+- No instales ni actualices dependencias.
+
+Al terminar, ejecuta las pruebas, cobertura, TypeScript, build y auditoría npm.
+
+Presenta los resultados reales, los archivos modificados y cualquier observación pendiente.
+
+**No realices commit, push, merge ni Pull Request. Espera mi revisión y autorización posterior.**
+````
+### Purpose and implementation outcome
+
+Resolve only the approved audit observations. Created fix/final-audit-observations from origin/main at 71e61cb after checking the live remote SHA. Updated the Node engine range and only the corresponding root lockfile metadata to ^22.12.0 || ^24.0.0 || >=26.0.0, matching Vitest and compatible with all Node constraints recorded in the existing lockfile. No dependency versions or resolutions changed, and no dependencies were installed or updated.
+
+Added a 15-second timeout covering fetch and response-body reading. An internal AbortController forwards external cancellation, preserves the first cancellation reason, and aborts timed-out requests with a dedicated user-facing message. The caller's signal remains unmodified on timeout so App can release its pending state and permit retry. Timers and external listeners are removed in finally. Existing unmount cancellation, duplicate prevention, API messages, and the REST contract are preserved. Backend, visual design, and AGENTS.md remain unchanged.
+
+Added nine test cases covering timeout timing, stalled response bodies, intentional and pre-existing cancellation, timer/listener cleanup after completion and errors, and UI recovery with successful retry. README metrics and timeout/Node documentation were updated without rewriting unrelated sections.
+
+### Validation results
+
+Executed from frontend/: npm.cmd test passed 65 tests across 3 files; npm.cmd run test:coverage passed all 65 tests; npm.cmd run typecheck and npm.cmd run build passed. V8 coverage: statements 100% (93/93), branches 97.1% (67/69), functions 100% (20/20), lines 100% (73/73). npm.cmd audit --json reported 0 vulnerabilities. No failures occurred during these implementation checks. Tests used simulated network responses and fake timers; real-browser timeout behavior and browser-to-Go integration still require manual review. No commits, pushes, merges, or Pull Requests were performed; owner review is pending.
