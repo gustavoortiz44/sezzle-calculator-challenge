@@ -1,0 +1,45 @@
+# JavaScript dependencies and generated output
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+coverage.out
+coverage.html
+*.coverprofile
+
+# Go build and test artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Local environment configuration
+.env
+.env.*
+!.env.example
+
+# Local editor settings
+.vscode/
+*.code-workspace
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*~
+
+# Windows metadata
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Dependency manifests and lockfiles are intentionally tracked.
