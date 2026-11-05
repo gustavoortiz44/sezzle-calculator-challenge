@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 function mockResponse(body: unknown, status = 200) {
@@ -16,6 +16,34 @@ async function enterNumbers(a = '10', b = '5') {
 }
 
 describe('calculator interface', () => {
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('recovers after a timeout and allows a successful retry', async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn().mockImplementation((_url, options) => new Promise((_resolve, reject) => {
+      options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+    }));
+    vi.stubGlobal('fetch', fetch);
+    const { container } = render(<App />);
+    fireEvent.change(screen.getByLabelText('First number'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('Second number'), { target: { value: '5' } });
+    fireEvent.submit(container.querySelector('form')!);
+    fireEvent.submit(container.querySelector('form')!);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: /Calculating/ })).toBeDisabled();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(screen.getByRole('alert')).toHaveTextContent('The calculation timed out. Please try again.');
+    expect(screen.getByRole('button', { name: /Calculate/ })).toBeEnabled();
+    expect(screen.getByLabelText('First number')).toBeEnabled();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    fetch.mockResolvedValue(new Response(JSON.stringify({ result: 15 })));
+    await act(async () => { fireEvent.submit(container.querySelector('form')!); });
+    expect(screen.getByText('15', { selector: '.result-number' })).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
   it('renders the accessible form and initial result', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Make it add up.' })).toBeVisible();

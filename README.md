@@ -39,7 +39,7 @@ $env:ALLOWED_ORIGIN = 'http://localhost:5173'
 
 ### Frontend
 
-Use Node.js 22.12+ on the 22.x line or Node.js 24.x (validated with Node 24.22.1 and npm 11.19.1). The installed Vite 8.3.6 and React plugin 6.2.1 accept Node `^20.19.0 || >=22.12.0`; Vitest 5.1.0 accepts `^22.12.0 || ^24.0.0 || >=26.0.0`. Node 20 is therefore not supported by this project's test toolchain.
+The supported Node.js range is `^22.12.0 || ^24.0.0 || >=26.0.0` (validated locally with Node 24.22.1 and npm 11.19.1). The installed Vite 8.3.6 and React plugin 6.2.1 accept Node `^20.19.0 || >=22.12.0`; Vitest 5.1.0 imposes the narrower project range. The other Node engine constraints in the lockfile also admit this range. Node 20, 23, and 25 are not supported by this project's test toolchain. Compatibility with other admitted versions is based on dependency metadata, not execution on every Node version.
 
 In a second terminal, from the repository root:
 
@@ -107,6 +107,7 @@ All response bodies are JSON; valid CORS preflight responses are empty with stat
 - The form accepts signed decimal numbers and exponent notation, rejects empty/non-finite input, and converts validated values to JSON numbers. Decimal commas and hexadecimal input are rejected. Arithmetic rules, including division by zero and overflow, remain in Go. Results are shown without additional rounding.
 - Submission disables the form and uses an immediate ref guard to prevent duplicate requests before React renders. Requests are aborted on unmount; aborted responses do not update state. Starting another calculation clears the prior result. A completed result retains the submitted operands even if inputs are edited afterward.
 - API errors preserve HTTP status and the structured code/message. The interface displays the backend message; connection failures and malformed responses receive clear fallback messages. Native labels, radio controls, keyboard focus indicators, associated validation messages, and live result/loading regions support accessibility.
+- HTTP requests have a 15-second timeout covering both the request and response-body reading. This provides margin over the Go server's 10-second read/write timeouts for simple arithmetic. Timeout aborts the request and displays "The calculation timed out. Please try again."; controls become available for retry. Intentional unmount cancellation stays distinct and does not display an error. Timers and external cancellation listeners are cleaned up after completion or failure.
 
 ## Tests, static checks, and coverage
 
@@ -139,9 +140,11 @@ npm run test:coverage
 npm run build
 ```
 
-Measured results: 54 tests passed across 3 files; TypeScript checks and the production build passed. A clean npm ci installation also succeeded with 0 reported vulnerabilities. Vite served the application HTML with HTTP 200 on port 5173; the temporary server was stopped after verification. V8 coverage: statements 98.66% (74/75), branches 95.38% (62/65), functions 100% (16/16), lines 100% (58/58). The client and operand validation both have 100% coverage in all four metrics. Coverage includes application, components, HTTP client, and validation; the bootstrap entry point, declarations, test setup, tests, and CSS are excluded. Defensive cancellation/fallback and submission guard paths account for uncovered branches/statements.
+Current measured results after the final audit fixes: 65 tests passed across 3 files; TypeScript checks and the production build passed. npm audit reported 0 vulnerabilities. V8 coverage: statements 100% (93/93), branches 97.1% (67/69), functions 100% (20/20), lines 100% (73/73). The client and operand validation both have 100% coverage in all four metrics. Coverage includes application, components, HTTP client, and validation; the bootstrap entry point, declarations, test setup, tests, and CSS are excluded. The remaining uncovered branches are defensive cancellation/fallback paths in App.
 
-HTML and JSON coverage reports are generated in frontend/coverage/ and excluded from Git. Tests use simulated fetch responses and user interactions to cover all four operations, validation, zero results, HTTP errors, bad responses, connection failure, loading, retries, duplicate prevention, stale-result clearing, and cancellation on unmount.
+Historical setup checks: a clean npm ci installation succeeded, and Vite served the application HTML with HTTP 200 on port 5173. Those installation and server checks were not repeated for the final audit fixes; no dependencies were installed or updated in this stage.
+
+HTML and JSON coverage reports are generated in frontend/coverage/ and excluded from Git. Tests use simulated fetch responses and user interactions to cover all four operations, validation, zero results, HTTP errors, bad responses, connection failure, loading, retries, duplicate prevention, stale-result clearing, and cancellation on unmount. Final audit fix tests also cover the 15-second timeout, stalled response bodies, intentional/pre-existing cancellation, cleanup of timers and listeners, and successful retry after a timeout.
 
 Initial validation exposed a mock reusing an already-consumed Response body; the test now makes both assertions against one promise. The first dependency selection reported 7 development-tool vulnerabilities; updating Vite, Vitest, coverage, and the React plugin resolved them (installation audit: 0 vulnerabilities). A temporary peer-resolution conflict was resolved with npm update, without force or legacy-peer-deps. Test/build tooling required authorized filesystem access outside the restricted runner.
 
